@@ -10,7 +10,9 @@
 
 use frame::prelude::*;
 
-use pop_dev::{PlaceholderTraitBound, pop_todo};
+mod placeholders;
+
+pub use placeholders::{PlaceholderTraitBound, PlaceholderType, pop_todo};
 
 {{ if using_currency }}
 use frame::traits::{fungible, VariantCount};
@@ -121,7 +123,7 @@ pub mod pallet {
         {{- match config_type.0 -}}
         {{- when TemplatePalletConfigTypesMetadata::Constant }}
         #[pallet::constant]
-        type ^^config_type.2|capitalize^^: Get<u32>;
+        type ^^config_type.2|capitalize^^: Get<PlaceholderType>;
 
         {{ else }}
         type ^^config_type.2|capitalize^^: PlaceholderTraitBound;
@@ -212,7 +214,7 @@ pub mod pallet {
     pub enum Origin {
         {{- for variant in pallet_custom_origin_variants }}
             ^^variant|capitalize^^,
-        {{- endfor -}}
+        {{- endfor }}
     }
 
     {{ endif -}}

@@ -1,6 +1,5 @@
-use crate::pallet::*;
+use crate::{pallet::*, pop_todo};
 use frame::prelude::*;
-use pop_dev::pop_todo;
 
 impl<T: Config> Pallet<T> {
     {{- for variant in pallet_custom_origin_variants }}

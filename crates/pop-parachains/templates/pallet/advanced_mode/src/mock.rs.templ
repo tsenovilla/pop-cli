@@ -2,7 +2,6 @@
 {{- let using_runtime_origin = pallet_common_types|contains(TemplatePalletConfigCommonTypes::RuntimeOrigin) -}}
 {{- let using_currency = pallet_common_types|contains(TemplatePalletConfigCommonTypes::Currency) -}}
 use crate::{self as pallet_^^name|lower^^, *};
-use pop_dev::{PlaceholderType, pop_todo};
 
 use frame::{
 	deps::frame_support::runtime,

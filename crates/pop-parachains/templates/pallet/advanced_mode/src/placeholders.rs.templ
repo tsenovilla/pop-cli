@@ -1,15 +1,23 @@
-pub trait PlaceholderTraitBound: Sized {}
+use frame::prelude::*;
 
+pub trait PlaceholderTraitBound {}
+
+#[derive(TypeInfo, Encode, Decode, MaxEncodedLen, PartialEq, RuntimeDebugNoBound)]
 pub struct PlaceholderType;
 
 impl PlaceholderTraitBound for PlaceholderType {}
+
+impl Get<PlaceholderType> for PlaceholderType{
+    fn get() -> PlaceholderType{
+        PlaceholderType
+    }
+}
 
 #[macro_export]
 macro_rules! pop_todo{
     (storage_hasher) => { Blake2_128Concat };
     (storage_key) => { u32 };
     (storage_value) => { u32 };
-    (constant_default_type) => { ConstU32<1> };
     (origin_success_type) => { u32 };
     (origin_match_type) => { Ok(1) };
 }

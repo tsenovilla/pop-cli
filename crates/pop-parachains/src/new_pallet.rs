@@ -10,7 +10,7 @@ use crate::{
 		PalletAdvancedBenchmarking, PalletAdvancedLib, PalletAdvancedMock, PalletAdvancedTests,
 		PalletCargoToml, PalletConfigPreludes, PalletItem, PalletLogic, PalletOrigin,
 		PalletSimpleBenchmarking, PalletSimpleLib, PalletSimpleMock, PalletSimpleTests,
-		PalletTestsUtils, PalletTryState, PalletWeights,
+		PalletTestsUtils, PalletTryState, PalletWeights, PalletPlaceholders
 	},
 	resolve_pallet_path,
 	utils::helpers::sanitize,
@@ -143,6 +143,7 @@ fn render_pallet(
 			Box::new(PalletLogic { pallet_custom_origin: config.pallet_custom_origin }),
 			Box::new(PalletTryState {}),
 			Box::new(PalletTestsUtils { name: pallet_name }),
+			Box::new(PalletPlaceholders { }),
 		];
 		if config.pallet_default_config {
 			pallet_contents.push(Box::new(PalletConfigPreludes {

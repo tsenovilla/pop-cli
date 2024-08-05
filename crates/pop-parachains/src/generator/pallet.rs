@@ -120,6 +120,10 @@ pub(crate) struct PalletTestsUtils {
 	pub(crate) name: String,
 }
 
+#[derive(Template)]
+#[template(path = "pallet/advanced_mode/src/placeholders.rs.templ", escape = "none")]
+pub(crate) struct PalletPlaceholders {}
+
 pub trait PalletItem {
 	/// Render and Write to file, root is the path to the pallet
 	fn execute(&self, root: &PathBuf) -> anyhow::Result<()>;
@@ -152,3 +156,4 @@ generate_pallet_item!(PalletConfigPreludes, "src/config_preludes.rs");
 generate_pallet_item!(PalletTryState, "src/pallet_logic/try_state.rs");
 generate_pallet_item!(PalletOrigin, "src/pallet_logic/origin.rs");
 generate_pallet_item!(PalletTestsUtils, "src/tests/utils.rs");
+generate_pallet_item!(PalletPlaceholders, "src/placeholders.rs");
