@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 
-use std::{fs, path::PathBuf};
+use std::{fs, path::PathBuf, process::Command};
 
 pub mod new_pallet_options;
 
@@ -173,6 +173,13 @@ fn render_pallet(
 	for item in pallet {
 		item.execute(pallet_path)?;
 	}
+
+    // Format the repo. If this fails we do nothing, it's not a major failure
+    let _ = Command::new("cargo")
+        .arg("fmt")
+        .current_dir(pallet_path)
+        .output();
+        
 	Ok(())
 }
 
