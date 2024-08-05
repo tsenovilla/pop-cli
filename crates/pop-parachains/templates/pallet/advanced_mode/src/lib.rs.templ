@@ -12,7 +12,7 @@ use frame::prelude::*;
 
 mod placeholders;
 
-pub use placeholders::{PlaceholderTraitBound, PlaceholderType, pop_todo};
+pub use placeholders::{PlaceholderTraitBound, PlaceholderType};
 
 {{ if using_currency }}
 use frame::traits::{fungible, VariantCount};
@@ -213,7 +213,7 @@ pub mod pallet {
     #[derive(PartialEq, Eq, Clone, RuntimeDebug, Encode, Decode, TypeInfo, MaxEncodedLen)]
     pub enum Origin {
         {{- for variant in pallet_custom_origin_variants }}
-            ^^variant|capitalize^^,
+        ^^variant|capitalize^^,
         {{- endfor }}
     }
 

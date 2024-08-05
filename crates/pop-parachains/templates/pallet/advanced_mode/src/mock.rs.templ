@@ -83,29 +83,14 @@ impl pallet_^^name|lower^^::Config for Test {
     {{- match config_type.1 -}}
     {{- when TemplatePalletConfigTypesDefault::Default -}}
     {{- if !pallet_default_config -}}
-    {{- match config_type.0 -}}
-    {{- when TemplatePalletConfigTypesMetadata::Constant }}
-    type ^^config_type.2|capitalize^^ = pop_todo!(constant_default_type);
-    {{- else }}
     type ^^config_type.2|capitalize^^ = PlaceholderType;
-    {{- endmatch -}}
     {{- endif -}}
     {{- when TemplatePalletConfigTypesDefault::NoDefaultBounds }}
     {{- if !pallet_default_config }}
-    {{- match config_type.0 -}}
-    {{- when TemplatePalletConfigTypesMetadata::Constant }}
-    type ^^config_type.2|capitalize^^ = pop_todo!(constant_default_type);
-    {{- else }}
     type ^^config_type.2|capitalize^^ = PlaceholderType;
-    {{- endmatch -}}
     {{- endif -}}
     {{- else }}
-    {{- match config_type.0 -}}
-    {{- when TemplatePalletConfigTypesMetadata::Constant }}
-    type ^^config_type.2|capitalize^^ = pop_todo!(constant_default_type);
-    {{- else }}
     type ^^config_type.2|capitalize^^ = PlaceholderType;
-    {{- endmatch -}}
     {{- endmatch -}}
     {{- endfor -}}
 }
