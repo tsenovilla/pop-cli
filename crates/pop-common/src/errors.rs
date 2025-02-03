@@ -10,6 +10,8 @@ pub enum Error {
 	AnyhowError(#[from] anyhow::Error),
 	#[error("Configuration error: {0}")]
 	Config(String),
+	#[error("{0}")]
+	Descriptive(String),
 	#[error("a git error occurred: {0}")]
 	Git(String),
 	#[error("IO error: {0}")]
@@ -29,10 +31,16 @@ pub enum Error {
 	ParseSecretURI(String),
 	#[error("SourceError error: {0}")]
 	SourceError(#[from] sourcing::Error),
+	#[error("Syn parse error: {0}. Pop CLI has to parse your code in order to expand it. To preserve its structure while parsing, some temporal type markers may be added in the target part of your code. If declaring a type in that part of the code is invalid Rust code, that may be the origin of this error. Please review the code you're modifying to solve this. Example: If you're modifying an Enum likee the following one, it'll fail as types cannot be defined inside enums\npub enum Enum{{\n\t//This is the painful comment\n\tA,\n\tB\n}}")]
+	SynError(#[from] syn::Error),
 	#[error("TemplateError error: {0}")]
 	TemplateError(#[from] templates::Error),
+	#[error("TomlError: {0}")]
+	TomlError(#[from] toml_edit::TomlError),
 	#[error("Unsupported command: {0}")]
 	UnsupportedCommand(String),
 	#[error("Unsupported platform: {arch} {os}")]
 	UnsupportedPlatform { arch: &'static str, os: &'static str },
+	#[error("Unable to write to the introduced path. {0}")]
+	WriteError(String),
 }
