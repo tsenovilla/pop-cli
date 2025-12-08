@@ -66,6 +66,11 @@ async fn parachain_lifecycle() -> Result<()> {
 		assert!(working_dir.join("frontend").exists());
 	}
 
+    	mock_build_process(&working_dir)?;
+	assert!(temp_dir.join("test_parachain/target/release/wbuild/parachain-template-runtime/parachain_template_runtime.wasm").exists());
+	let binary_name = fetch_runtime(&working_dir).await?;
+	let binary_path = replace_mock_with_runtime(&working_dir, binary_name)?;
+	assert!(binary_path.exists());
 
 	// pop build spec --output ./target/pop/test-spec.json --para-id 2222 --type development --relay
 	// paseo-local --protocol-id pop-protocol --chain local --deterministic=false
