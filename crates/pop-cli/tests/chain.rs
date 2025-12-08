@@ -201,7 +201,7 @@ rpc_port = {random_port}
 		&working_dir,
 		["up", "network", "./network.toml", "-r", "stable2506-2", "--verbose", "--skip-confirm"],
 	);
-	let mut up = TestChildProcess(command.spawn()?);
+	assert!(command.spawn()?.wait().await?.success());
 
 	// Wait for the networks to initialize. Increased timeout to accommodate CI environment delays.
 	let wait = Duration::from_secs(300);
@@ -287,10 +287,6 @@ rpc_port = {random_port}
 	);
 	assert!(command.spawn()?.wait().await?.success());
 
-	assert!(up.0.try_wait()?.is_none(), "the process should still be running");
-	// Stop the process
-	up.0.kill().await?;
-	up.0.wait().await?;
 
 	Ok(())
 }
