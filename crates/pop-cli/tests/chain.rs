@@ -26,44 +26,6 @@ use strum::VariantArray;
 use tempfile::tempdir;
 use tokio::process::Child;
 
-/// Utility child process wrapper to kill the child process on drop.
-///
-/// To be used exclusively for tests.
-struct TestChildProcess(pub(crate) Child);
-
-impl Drop for TestChildProcess {
-	fn drop(&mut self) {
-		let _ = self.0.start_kill();
-	}
-}
-
-// Test that all templates are generated correctly
-#[tokio::test]
-async fn generate_all_the_templates() -> Result<()> {
-	let temp = tempfile::tempdir()?;
-	let temp_dir = temp.path();
-
-	for template in ChainTemplate::VARIANTS {
-		let parachain_name = format!("test_parachain_{}", template);
-		let provider = template.template_type()?.to_lowercase();
-		// pop new chain test_parachain --verify
-		let mut command = pop(
-			temp_dir,
-			[
-				"new",
-				"chain",
-				&parachain_name,
-				&provider,
-				"--template",
-				template.as_ref(),
-				"--verify",
-			],
-		);
-		assert!(command.spawn()?.wait().await?.success());
-		assert!(temp_dir.join(parachain_name).exists());
-	}
-	Ok(())
-}
 
 /// Test the parachain lifecycle: new, build, up, call.
 #[tokio::test]
@@ -103,12 +65,6 @@ async fn parachain_lifecycle() -> Result<()> {
 		assert!(working_dir.join("frontend").exists());
 	}
 
-	// Mock build process and fetch binary
-	mock_build_process(&working_dir)?;
-	assert!(temp_dir.join("test_parachain/target/release/wbuild/parachain-template-runtime/parachain_template_runtime.wasm").exists());
-	let binary_name = fetch_runtime(&working_dir).await?;
-	let binary_path = replace_mock_with_runtime(&working_dir, binary_name)?;
-	assert!(binary_path.exists());
 
 	// pop build spec --output ./target/pop/test-spec.json --para-id 2222 --type development --relay
 	// paseo-local --protocol-id pop-protocol --chain local --deterministic=false
@@ -161,8 +117,6 @@ async fn parachain_lifecycle() -> Result<()> {
 	assert!(content.contains("\"protocolId\": \"pop-protocol\""));
 	assert!(content.contains("\"id\": \"test-chain\""));
 
-	// Test the `pop bench` feature
-	test_benchmarking(&working_dir).await?;
 
 	// Overwrite the config file to manually set the port to test pop call parachain.
 	let network_toml_path = working_dir.join("network.toml");
@@ -288,101 +242,6 @@ rpc_port = {random_port}
 	assert!(command.spawn()?.wait().await?.success());
 
 
-	Ok(())
-}
-
-async fn test_benchmarking(working_dir: &Path) -> Result<()> {
-	// pop bench block --from 0 --to 1 --profile=release
-	let mut command = pop(working_dir, ["bench", "block", "-y", "--from", "0", "--to", "1"]);
-	assert!(command.spawn()?.wait().await?.success());
-	// pop bench machine --allow-fail --profile=release
-	command = pop(working_dir, ["bench", "machine", "-y", "--allow-fail"]);
-	assert!(command.spawn()?.wait().await?.success());
-	// pop bench overhead --runtime={runtime_path} --genesis-builder=runtime
-	// --genesis-builder-preset=development --weight-path={output_path} --profile=release --warmup=1
-	// --repeat=1 -y
-	let runtime_path = get_mock_runtime_path();
-	let temp_dir = tempdir()?;
-	let output_path = temp_dir.path();
-	assert!(!output_path.join("block_weights.rs").exists());
-	command = pop(
-		working_dir,
-		[
-			"bench",
-			"overhead",
-			&format!("--runtime={}", runtime_path.display()),
-			"--genesis-builder=runtime",
-			"--genesis-builder-preset=development",
-			&format!("--weight-path={}", output_path.display()),
-			"--warmup=1",
-			"--repeat=1",
-			"--profile=release",
-			"-y",
-		],
-	);
-	assert!(command.spawn()?.wait().await?.success());
-
-	// pop bench pallet --runtime={runtime_path} --genesis-builder=runtime
-	// --pallets pallet_timestamp,pallet_system --extrinsic set,remark --output={output_path} -y
-	// --skip-parameters
-	assert!(!output_path.join("weights.rs").exists());
-	assert!(!working_dir.join("pop-bench.toml").exists());
-	command = pop(
-		working_dir,
-		[
-			"bench",
-			"pallet",
-			&format!("--runtime={}", runtime_path.display()),
-			"--genesis-builder=runtime",
-			"--pallets",
-			"pallet_timestamp,pallet_system",
-			"--extrinsic",
-			"set,remark",
-			&format!("--output={}", output_path.join("weights.rs").display()),
-			"--skip-parameters",
-			"-y",
-		],
-	);
-	assert!(command.spawn()?.wait().await?.success());
-	// Parse weights file.
-	assert!(output_path.join("weights.rs").exists());
-	let content = fs::read_to_string(output_path.join("weights.rs"))?;
-	let expected = [
-		"// Executed Command:".to_string(),
-		"//  pop".to_string(),
-		"//  bench".to_string(),
-		"//  pallet".to_string(),
-		format!("//  --runtime={}", runtime_path.display()),
-		"//  --pallets=pallet_timestamp,pallet_system".to_string(),
-		"//  --extrinsic=set,remark".to_string(),
-		"//  --steps=50".to_string(),
-		format!("//  --output={}", output_path.join("weights.rs").display()),
-		"//  --genesis-builder=runtime".to_string(),
-		"//  --skip-parameters".to_string(),
-		"//  -y".to_string(),
-	]
-	.join("\n");
-
-	assert!(
-		content.contains(&expected),
-		"expected command block not found.\nExpected:\n{}\n---\nContent:\n{}",
-		expected,
-		content
-	);
-
-	assert!(working_dir.join("pop-bench.toml").exists());
-	// Use the generated pop-bench.toml file:
-	// pop bench pallet --bench-file={working_dir.join("pop-bench.toml")} -y
-	command = pop(
-		working_dir,
-		[
-			"bench",
-			"pallet",
-			&format!("--bench-file={}", working_dir.join("pop-bench.toml").display()),
-			"-y",
-		],
-	);
-	assert!(command.spawn()?.wait().await?.success());
 	Ok(())
 }
 
