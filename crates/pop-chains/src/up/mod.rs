@@ -453,7 +453,7 @@ impl NetworkConfiguration {
 			Some(file) => Some(NetworkConfiguration::resolve_path(&file.path())?),
 		};
 
-        println!("{:?}", relay_chain_spec_file);
+        println!("HELLOOOOOOO: {:?}", relay_chain_spec_file);
 
 		// Use builder to clone network config, adapting binary paths as necessary
 		let mut builder = NetworkConfigBuilder::new()
