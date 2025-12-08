@@ -4,6 +4,7 @@
 
 #![cfg(all(feature = "chain", feature = "integration-tests"))]
 #![allow(dead_code)]
+#![allow(unused_imports)]
 
 use anyhow::Result;
 use pop_chains::{
