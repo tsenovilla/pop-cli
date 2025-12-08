@@ -3,6 +3,7 @@
 //! Integration tests for chain-related functionality.
 
 #![cfg(all(feature = "chain", feature = "integration-tests"))]
+#![allow(dead_code)]
 
 use anyhow::Result;
 use pop_chains::{
