@@ -493,13 +493,11 @@ impl NetworkConfiguration {
 				}
 				// Configure chain spec generator or file
 				if source.chain().as_str().contains("paseo") {
+                        let path = PathBuf::from(relay_chain_spec_file.unwrap());
 						let chain_spec = crate::get_paseo_spec_content();
-						let temp_dir = std::env::temp_dir();
-						let spec_path = temp_dir.join("paseo-spec.json");
-						std::fs::write(&spec_path, chain_spec)
+						std::fs::write(&path, chain_spec)
 							.expect("Failed to write passet-hub chain spec");
-						builder = builder.with_chain_spec_path(spec_path);
-						chain_spec_generator = None;
+						builder = builder.with_chain_spec_path(path);
 					}
 				// Overrides: genesis/wasm
 				if let Some(genesis) = source.runtime_genesis_patch() {
