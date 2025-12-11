@@ -440,14 +440,6 @@ impl NetworkConfiguration {
 	) -> Result<NetworkConfig, Error> {
 		// Resolve paths to relay binary and chain spec generator
 		let binary_path = NetworkConfiguration::resolve_path(&relay_chain.binary.path())?;
-		let chain_spec_generator = match &relay_chain.chain_spec_generator {
-			None => None,
-			Some(path) => Some(format!(
-				"{} {}",
-				NetworkConfiguration::resolve_path(&path.path())?,
-				"{{chainName}}"
-			)),
-		};
 		let relay_chain_spec_file = match &relay_chain.chain_spec_file {
 			None => None,
 			Some(file) => {
