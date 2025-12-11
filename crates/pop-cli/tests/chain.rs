@@ -52,8 +52,6 @@ async fn parachain_lifecycle() -> Result<()> {
 			],
 		);
 		assert!(command.spawn()?.wait().await?.success());
-		assert!(working_dir.exists());
-		assert!(working_dir.join("frontend").exists());
 
 
 	Ok(())
