@@ -9,7 +9,7 @@
 use anyhow::Result;
 use pop_chains::{
 	ChainTemplate,
-	up::{ArchiveType, Source::GitHub, SourcedArchive},
+	up::{Source::GitHub},
 };
 use pop_common::{
 	find_free_port,
