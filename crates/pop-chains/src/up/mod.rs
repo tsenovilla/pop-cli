@@ -487,7 +487,7 @@ impl NetworkConfiguration {
 				}
 				// Configure chain spec generator or file
 				if let Some(ref path) = relay_chain_spec_file {
-					builder = builder.with_chain_spec_path(path.as_str());
+					builder = builder.with_chain_spec_path(PathBuf::from(path));
 				} else if let Some(command) = chain_spec_generator {
 					builder = builder.with_chain_spec_command(command);
 				}
@@ -579,7 +579,7 @@ impl NetworkConfiguration {
 				}
 				// Configure chain spec generator or file
 				if let Some(ref path) = parachain_chain_spec_file {
-					builder = builder.with_chain_spec_path(path.as_str());
+					builder = builder.with_chain_spec_path(PathBuf::from(path));
 				} else if let Some(command) = chain_spec_generator {
 					builder = builder.with_chain_spec_command(command);
 				}
@@ -619,9 +619,16 @@ impl NetworkConfiguration {
 			})
 		}
 
-		builder
+		let config = builder
 			.build()
-			.map_err(|e| Error::Config(format!("could not configure network {:?}", e)))
+			.map_err(|e| Error::Config(format!("could not configure network {:?}", e)))?;
+
+		// Debug: Print the generated config
+		if let Ok(toml) = config.dump_to_toml() {
+			println!("=== GENERATED ZOMBIENET CONFIG ===\n{}\n=================================", toml);
+		}
+
+		Ok(config)
 	}
 
 	// Build a node using the provided builder and source config.
