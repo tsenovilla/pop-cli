@@ -460,6 +460,7 @@ impl NetworkConfiguration {
 				let nodes = source.nodes();
 
 				let mut builder = relay
+                . with_chain(source.chain().as_str())
 					.with_default_args(source.default_args().into_iter().cloned().collect())
 					// Replace default command with resolved binary path
 					.with_default_command(binary_path.as_str());
@@ -471,9 +472,6 @@ impl NetworkConfiguration {
 					builder = builder.with_chain_spec_path(PathBuf::from(path));
 				} else if let Some(command) = chain_spec_generator {
 					builder = builder.with_chain_spec_command(command);
-				} else {
-					// Only set chain parameter if not using a chain spec file
-					builder = builder.with_chain(source.chain().as_str());
 				}
 
 				// Chain spec
