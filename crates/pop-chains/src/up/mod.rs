@@ -450,7 +450,17 @@ impl NetworkConfiguration {
 		};
 		let relay_chain_spec_file = match &relay_chain.chain_spec_file {
 			None => None,
-			Some(file) => Some(NetworkConfiguration::resolve_path(&file.path())?),
+			Some(file) => {
+				// Copy chain spec to temp file (similar to passet-hub approach)
+				let source_path = file.path();
+				let chain_spec_content = std::fs::read(&source_path)
+					.map_err(|e| Error::Config(format!("Failed to read chain spec file at {:?}: {}", source_path, e)))?;
+				let temp_dir = std::env::temp_dir();
+				let temp_spec_path = temp_dir.join(format!("paseo-relay-{}.json", relay_chain.runtime.as_ref()));
+				std::fs::write(&temp_spec_path, chain_spec_content)
+					.map_err(|e| Error::Config(format!("Failed to write chain spec to temp: {}", e)))?;
+				Some(NetworkConfiguration::resolve_path(&temp_spec_path)?)
+			},
 		};
 
 		// Use builder to clone network config, adapting binary paths as necessary
@@ -460,21 +470,10 @@ impl NetworkConfiguration {
 				let nodes = source.nodes();
 
 				let mut builder = relay
+					.with_chain(source.chain().as_str())
 					.with_default_args(source.default_args().into_iter().cloned().collect())
 					// Replace default command with resolved binary path
 					.with_default_command(binary_path.as_str());
-
-				// Configure chain spec generator or file
-				// Note: When using chain_spec_path, we should not set the chain parameter
-				// as the chain spec file itself contains the chain definition
-				if let Some(ref path) = relay_chain_spec_file {
-					builder = builder.with_chain_spec_path(PathBuf::from(path));
-				} else if let Some(command) = chain_spec_generator {
-					builder = builder.with_chain_spec_command(command);
-				} else {
-					// Only set chain parameter if not using a chain spec file
-					builder = builder.with_chain(source.chain().as_str());
-				}
 
 				// Chain spec
 				if let Some(command) = source.chain_spec_command() {
@@ -491,6 +490,12 @@ impl NetworkConfiguration {
 				{
 					builder =
 						builder.with_chain_spec_command_output_path(chain_spec_command_output_path);
+				}
+				// Configure chain spec generator or file
+				if let Some(ref path) = relay_chain_spec_file {
+					builder = builder.with_chain_spec_path(PathBuf::from(path));
+				} else if let Some(command) = chain_spec_generator {
+					builder = builder.with_chain_spec_command(command);
 				}
 				// Overrides: genesis/wasm
 				if let Some(genesis) = source.runtime_genesis_patch() {
