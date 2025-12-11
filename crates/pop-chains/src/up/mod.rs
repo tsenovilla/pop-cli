@@ -453,8 +453,6 @@ impl NetworkConfiguration {
 			Some(file) => Some(NetworkConfiguration::resolve_path(&file.path())?),
 		};
 
-        println!("HELLOOOOOOO: {:?}", relay_chain_spec_file);
-
 		// Use builder to clone network config, adapting binary paths as necessary
 		let mut builder = NetworkConfigBuilder::new()
 			.with_relaychain(|relay| {
@@ -462,14 +460,23 @@ impl NetworkConfiguration {
 				let nodes = source.nodes();
 
 				let mut builder = relay
-					.with_chain(source.chain().as_str())
 					.with_default_args(source.default_args().into_iter().cloned().collect())
 					// Replace default command with resolved binary path
 					.with_default_command(binary_path.as_str());
 
+				// Configure chain spec generator or file
+				// Note: When using chain_spec_path, we should not set the chain parameter
+				// as the chain spec file itself contains the chain definition
+				if let Some(ref path) = relay_chain_spec_file {
+					builder = builder.with_chain_spec_path(PathBuf::from(path));
+				} else if let Some(command) = chain_spec_generator {
+					builder = builder.with_chain_spec_command(command);
+				} else {
+					// Only set chain parameter if not using a chain spec file
+					builder = builder.with_chain(source.chain().as_str());
+				}
+
 				// Chain spec
-				println!("SOURCE chain_spec_command: {:?}", source.chain_spec_command());
-				println!("SOURCE chain_spec_path: {:?}", source.chain_spec_path());
 				if let Some(command) = source.chain_spec_command() {
 					builder = builder.with_chain_spec_command(command);
 				}
@@ -484,12 +491,6 @@ impl NetworkConfiguration {
 				{
 					builder =
 						builder.with_chain_spec_command_output_path(chain_spec_command_output_path);
-				}
-				// Configure chain spec generator or file
-				if let Some(ref path) = relay_chain_spec_file {
-					builder = builder.with_chain_spec_path(PathBuf::from(path));
-				} else if let Some(command) = chain_spec_generator {
-					builder = builder.with_chain_spec_command(command);
 				}
 				// Overrides: genesis/wasm
 				if let Some(genesis) = source.runtime_genesis_patch() {
