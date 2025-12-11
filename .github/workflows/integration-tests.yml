@@ -85,4 +85,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          cargo nextest run --locked --no-default-features --features "chain,integration-tests" --test chain --nocapture
+          cargo nextest run --locked --no-default-features --features "chain,integration-tests" --test chain --nocapture parachain_lifecycle

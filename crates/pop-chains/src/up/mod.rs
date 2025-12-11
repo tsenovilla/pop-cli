@@ -468,6 +468,8 @@ impl NetworkConfiguration {
 					.with_default_command(binary_path.as_str());
 
 				// Chain spec
+				println!("SOURCE chain_spec_command: {:?}", source.chain_spec_command());
+				println!("SOURCE chain_spec_path: {:?}", source.chain_spec_path());
 				if let Some(command) = source.chain_spec_command() {
 					builder = builder.with_chain_spec_command(command);
 				}
